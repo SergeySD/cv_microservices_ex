@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  rabbitmq:
+    build:
+      dockerfile: docker/rabbitmq/Dockerfile
+      context: ./
+    environment:
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=user
+    ports:
+      - 1883:1883
+      - 15672:15672
+  registration:
+    build:
+      dockerfile: docker/registration/Dockerfile
+      context: ./
+  state:
+    build:
+      dockerfile: docker/state/Dockerfile
+      context: ./
+  statedb:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - statedb_data:/data/db 
+    ports:
+      - 27017:27017
+  telemetry:
+    build:
+      dockerfile: docker/telemetry/Dockerfile
+      context: ./            
+  telemetrydb:
+    image: elasticsearch:8.4.1
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - telemetrydb_data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+volumes:
+  statedb_data: {}
+  telemetrydb_data: {}
